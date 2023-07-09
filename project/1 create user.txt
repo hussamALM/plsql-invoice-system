@@ -1,0 +1,5 @@
+-- create user pointOfSal
+create user pointOfSal identified by pointOfSal; 
+
+-- give the user all the privilege of a programmer
+grant create table, create view , create session , create procedure , create sequence to pointOfSal;

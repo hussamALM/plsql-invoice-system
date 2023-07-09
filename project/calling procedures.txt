@@ -1,0 +1,19 @@
+execute pointOfsal.addNewCustomer(Cname,gender);
+
+execute pointOfsal.addNewEmployee(Ename,job);
+
+execute pointOfsal.addNewCategory(catName);
+
+execute pointOfsal.addNewItem(Iname,price,quantity,category);
+
+execute pointOfsal.addNewBranch(Bname);
+
+execute pointOfsal.newItemQuantity(Iname,newQuantity);
+
+execute pointOfsal.addNewInvoice(Cname,Ename,Bname,date);
+
+execute pointOfsal.addInvoiceDetail(InvoiceNo,Iname,quantity);
+
+execute pointOfsal.removeInvoiceItem(invoiceNo,Iname);
+
+execute pointOfSal.getCustomerInvoiceInfo(InvoiceNo);

@@ -1,0 +1,14 @@
+
+create view invoiceMaster AS 
+select customerName , employeeName , invoiceNo , total , price , branchName ,invoiceDate , invoices.branchNo ,invoices.employeeNo , invoices.customerNo 
+from invoices 
+join employees on employees.employeeNo = invoices.employeeNo 
+join customers on customers.customerNo = invoices.customerNo
+join branches on branches.branchNo = invoices.branchNo;
+
+
+create view invoiceMasterDetail AS
+select invoiceDetails.invoiceNo, invoiceDetails.paidPrice, invoiceDetails.quantity, items.itemName , invoices.price as total_price 
+from invoiceDetails 
+join items on items.itemNo = invoiceDetails.itemNo
+join invoices on invoices.invoiceNo = invoiceDetails.invoiceNo;

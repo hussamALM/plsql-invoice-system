@@ -1,0 +1,83 @@
+create table categories(
+catNo number primary key ,
+categoryName varchar2(50)
+);
+
+---
+
+create table items(
+itemNo number primary key,
+itemName varchar2(50),
+price number,
+total_quantity number,
+catNo number,
+FOREIGN KEY (catNo) REFERENCES categories(catNo)
+);
+
+
+----
+
+create table items_stored_entry(
+entry_no number primary key,
+itemNo number,
+entry_date date,
+quantity number,
+foreign key (itemNo) references items(itemNo)
+);
+
+---
+
+create table employees (
+employeeNo number primary key,
+employeeName varchar2(20),
+job varchar2(20)
+);
+
+--
+
+create table customers(
+customerNo number primary key,
+customerName varchar2(20),
+gender varchar2(10)
+);
+
+
+--
+
+create table branches (
+branchNo number primary key,
+branchName varchar2(25)
+);
+
+
+---
+
+create table invoices(
+invoiceNo number primary key,
+employeeNo number references employees(employeeNO),
+customerNo number references customers(customerNo),
+total number,
+price number,
+invoiceDate date,
+branchNo number references branches(branchNo)
+);
+
+---
+
+create table invoiceDetails(
+invoiceNo number references invoices(invoiceNo),
+itemNo number references items(itemNo),
+paidPrice number,
+quantity number
+);
+
+--
+
+create table InvoiceDeatail_deleted_History(
+invoiceNo number references invoices(invoiceNo),
+itemNo number references items(itemNo),
+paidPrice number,
+quantity number,
+deleteDate date
+);
+

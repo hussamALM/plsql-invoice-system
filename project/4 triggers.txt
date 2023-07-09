@@ -1,0 +1,52 @@
+create or replace trigger autoIncrementCustomer 
+before insert on customers for each row 
+begin 
+select nvl(max(customerNo),0)+1 into :new.customerNo from customers;
+end;
+
+
+
+
+create or replace trigger autoIncrementEmployee 
+before insert on employees for each row
+begin 
+select nvl(max(employeeNo),0)+1 into :new.employeeNo from employees;
+end;
+
+
+
+
+create or replace trigger autoIncrementCategory
+before insert on categories for each row
+begin 
+select nvl(max(catNo),0)+1 into :new.catNo from categories;
+end;
+
+
+
+
+create or replace trigger autoIncrementItem 
+before insert on items for each row
+begin
+select nvl(max(itemNo),0)+1 into :new.itemNo from items;
+end;
+
+
+
+
+create or replace trigger autoIncrementBrnach 
+before insert on branches for each row
+begin 
+select nvl(max(branchNo),0)+1 into :new.branchNo from branches;
+end;
+
+
+
+
+
+create or replace trigger autoIncrementStoredItems 
+before insert on items_stored_entry for each row
+begin
+select nvl(max(entry_no),0)+1 into :new.entry_no from items_stored_entry;
+end;
+

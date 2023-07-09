@@ -1,0 +1,63 @@
+create or replace package pointOfSal  
+is 
+
+procedure addNewCustomer(name customers.customerName%type , 
+gender1 customers.gender%type 
+);
+
+
+procedure addNewEmployee(name employees.employeeName%type,
+job1 employees.job%type
+);
+
+
+procedure addNewCategory(name categories.categoryName%type);
+
+
+procedure addNewItem(
+itemName1 items.itemName%type,
+itemPrice items.price%type,
+quantity items.total_quantity%type,
+category categories.categoryName%type
+);
+
+
+procedure addNewBranch(name branches.branchName%type);
+
+
+
+procedure newItemQuantity(
+name items.itemName%type,
+newQuantity items.total_quantity%type
+);
+
+
+procedure addNewInvoice(
+Cname customers.customerName%type,
+Ename employees.employeeName%type,
+Bname branches.branchName%type,
+invoiceDate1 invoices.invoiceDate%type
+);
+
+
+procedure addInvoiceDetail(
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type,
+quantity1 items.total_quantity%type
+);
+
+
+
+
+procedure removeInvoiceItem(
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type
+);
+
+
+
+ procedure getCustomerInvoiceInfo(
+invoiceNo1 invoices.invoiceNo%type
+) ;
+
+end;

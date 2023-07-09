@@ -1,0 +1,18 @@
+-- secure the database
+create or replace trigger secureInvoice 
+before insert or update or delete on invoices 
+begin 
+ if (TO_CHAR(SYSDATE,'DY') IN ('FRI','SAT')) then
+  RAISE_APPLICATION_ERROR(-20500, 'you cant modify the invoices on the friday or saturday');
+end if ;
+end;
+
+
+
+create or replace trigger secureInvoiceDetails
+before insert or update or delete on invoiceDetails 
+begin 
+ if (TO_CHAR(SYSDATE,'DY') IN ('FRI','SAT')) then
+  RAISE_APPLICATION_ERROR(-20500, 'you cant modify the invoicesDetails table on the friday or saturday');
+end if ;
+end;

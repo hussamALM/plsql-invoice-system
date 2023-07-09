@@ -1,0 +1,478 @@
+create or replace package body pointOfSal 
+is
+--##################################
+--A)
+
+-- the function return -1 if there is a customer with this name
+function checkExistingCustomer(name customers.customerName%type ) return number
+is 
+cursor records is select * from customers;
+begin 
+for i in records loop
+if UPPER(i.customerName) = UPPER(name) then 
+return -1;
+end if;
+end loop;
+return 1;
+end checkExistingCustomer;
+
+
+procedure addNewCustomer(name customers.customerName%type , 
+gender1 customers.gender%type 
+)
+is
+begin 
+if checkExistingCustomer(name) = -1 then
+dbms_output.put_line('the customer: '|| name ||',is already there'); 
+else 
+insert into customers(customerName,gender) values(name , gender1);
+end if;
+commit;
+end addNewCustomer;
+
+
+--##################################
+--B)
+
+
+
+-- this function return -1 if there is an employee with this name
+function checkExistingEmployee(name employees.employeeName%type) return number
+is
+cursor records is select * from employees;
+begin 
+for i in records loop
+if UPPER(i.employeeName) = UPPER(name) then 
+return -1;
+end if;
+end loop;
+return 1;
+end checkExistingEmployee;
+
+
+procedure addNewEmployee(name employees.employeeName%type,
+job1 employees.job%type
+)
+is 
+begin
+if checkExistingEmployee(name) = -1 then 
+dbms_output.put_line('the employee: '||name||' is already there');
+else 
+insert into employees(employeeName , job) values (name,job1);
+end if;
+commit;
+end addNewEmployee;
+
+
+--##################################
+--C)
+
+
+--this function return -1 if there is a category with this name
+function checkExistingCategory(name categories.categoryName%type) return number
+is 
+name1 categories.categoryName%type;
+begin
+select categoryName into name1 from categories where UPPER(categoryName) = UPPER(name);
+return -1;
+exception
+when no_data_found then
+return 1;
+when too_many_rows then
+return -1;
+end checkExistingCategory;
+
+
+
+procedure addNewCategory(name categories.categoryName%type)
+is
+begin
+if checkExistingCategory(name) = -1 then
+dbms_output.put_line('the category: '||name ||' is already there');
+else 
+insert into categories(categoryName) values(name);
+end if;
+commit;
+end addNewCategory;
+
+
+--##################################
+--D)
+
+
+-- this functoin will return -1 if there is an item with this name 
+function checkExistingItem(name items.itemNAme%type) return number
+is 
+name1 items.itemName%type;
+begin
+select itemName into name1 from items where UPPER(itemName) = UPPER(name);
+return -1;
+exception 
+when no_data_found then
+return 1;
+when too_many_rows then
+return -1;
+end checkExistingItem;
+
+
+
+-- this function return the category number and if there is no categoyr with this name it will return -1
+function getCategoryNo(name categories.categoryName%type)return number
+is 
+catNo1 categories.catno%type;
+begin
+select catno into catNo1 from categories where UPPER(categoryName) = UPPER(name) ;
+return catNo1;
+exception 
+when no_data_found then 
+return -1;
+end getCategoryNo;
+
+
+
+
+procedure addNewItem(
+itemName1 items.itemName%type,
+itemPrice items.price%type,
+quantity items.total_quantity%type,
+category categories.categoryName%type
+) 
+is
+catgoryNo1 number := getCategoryNo(category);
+begin
+if checkExistingCategory(category) =1 then
+dbms_output.put_line('there is no category with this name: '|| category);
+return;
+elsif checkExistingItem(itemName1) =-1 then
+dbms_output.put_line('this item: '||itemName1||' is already there');
+else 
+insert into items(itemName,price,total_quantity,catNo) values (itemName1,itemPrice,quantity,catgoryNo1);
+end if;
+commit;
+end addNewItem;
+
+
+
+
+--##################################
+--E)
+
+-- this functin will return -1 if there is a branch with that name
+function checkExistingBrnach(name branches.branchName%type) return number 
+is 
+begin
+for i in (select * from branches) loop 
+if UPPER(i.branchName) = UPPER(name) then
+return -1;
+end if;
+end loop;
+return 1;
+end checkExistingBrnach;
+
+
+procedure addNewBranch(name branches.branchName%type)
+is 
+begin
+if checkExistingBrnach(name) = -1 then 
+dbms_output.put_line('this brnach: '|| name ||' is already there');
+else 
+insert into branches(branchName) values(name);
+end if;
+commit;
+end addNewBranch;
+
+
+
+--##################################
+--F)
+
+
+function getItemNo(name items.itemName%type) return number 
+is
+begin
+for i in (select * from items) loop
+if UPPER(i.itemName) = UPPER(name) then 
+return i.itemNo;
+end if;
+end loop;
+return -1;
+end getItemNo;
+
+
+procedure newItemQuantity(
+name items.itemName%type,
+newQuantity items.total_quantity%type
+)
+is 
+itemNo1 number :=getItemNo(name);
+newestQuantity items.total_quantity%type;
+begin
+if checkExistingItem(name) =1 then
+dbms_output.put_line('there is no item with this name: '|| name);
+else 
+insert into items_stored_entry(itemNo,entry_date,quantity) values
+(itemNo1,sysdate,newQuantity);
+update items set total_quantity = total_quantity +newQuantity where itemName =name;
+select total_quantity into newestQuantity from items where itemName = name;
+dbms_output.put_line('the new quantity of the item:'||name||' is '|| newestQuantity);
+end if;
+commit;
+end newItemQuantity;
+
+
+
+--##################################
+--G)
+
+-- this function get the next maximum number for the invoices table
+function getNextInvoiceNo return number 
+is 
+maxi invoices.invoiceNo%type;
+begin 
+select nvl(max(invoiceNo),0)+1 into maxi from invoices;
+return maxi;
+end getNextInvoiceNo;
+
+
+-- get the customer number by its name
+function getCustomerNo(name customers.customerName%type) return number 
+is 
+begin
+for i in (select * from customers) loop 
+if UPPER(i.customerName) = UPPER(name) then
+return i.customerNo;
+end if;
+end loop;
+return -1;
+end getCustomerNo;
+
+
+-- get employee number by its name
+function getEmployeeNo(name employees.employeeName%type) return number
+is 
+begin
+for i in (select * from employees) loop
+if UPPER(i.employeeName) = UPPER(name) then 
+return i.employeeNo;
+end if ;
+end loop;
+return -1;
+end getEmployeeNo;
+
+
+-- get branh number by its name
+function getBranchNo(name branches.branchName%type) return number 
+is 
+begin 
+for i in(select * from branches) loop
+if UPPER(i.branchName) = UPPER(name) then
+return i.branchNo;
+end if;
+end loop;
+return -1;
+end getBranchNo;
+
+
+
+procedure addNewInvoice(
+Cname customers.customerName%type,
+Ename employees.employeeName%type,
+Bname branches.branchName%type,
+invoiceDate1 invoices.invoiceDate%type
+)
+is 
+nextInvoice number := getNextInvoiceNo();
+employeeNo number := getEmployeeNo(Ename);
+customerNo number := getCustomerNo(Cname);
+branchNo number:=getBranchNo(Bname);
+begin
+if checkExistingCustomer(Cname)=1 then
+dbms_output.put_line('there is no customer with this name: '|| Cname);
+elsif checkExistingEmployee(Ename) =1 then 
+dbms_output.put_line('there is no employee with this name: '||Ename);
+elsif checkExistingBrnach(Bname) =1 then
+dbms_output.put_line('there is no branch with this name: '||Bname);
+else 
+insert into invoices values(nextInvoice,employeeNo,customerNo,
+0,0,invoiceDate1,
+branchNo
+);
+dbms_output.put_line('the invoice added');
+end if;
+commit;
+end addNewInvoice;
+
+
+--##################################
+--H)
+
+
+-- this function should return 1 if there is an invoice with this number
+function checkExistingInvoice(
+invoiceNo1 invoices.invoiceNo%type
+) return number 
+is 
+begin 
+for i in (select * from invoices) loop 
+if i.invoiceNo = invoiceNo1 then 
+return 1;
+end if;
+end loop;
+return -1; 
+end checkExistingInvoice;
+
+
+function getItemPrice(no items.itemNo%type) return items.price%type 
+is
+itemPrice items.price%type;
+begin 
+select price into itemPrice from items where itemNo = no ;
+return itemPrice;
+exception 
+when no_data_found then 
+return -1;
+end getItemPrice;
+
+
+
+-- this function should return 1 if there is an invoice detail with this details
+function checkExistingInvoiceItem(
+invoiceNo1 invoices.invoiceNo%type,
+itemNo1 items.itemNo%type
+) return number
+is 
+begin
+for i in (select * from invoiceDetails) loop
+if i.invoiceNo = invoiceNo1 AND i.itemNo =itemNo1 then 
+return 1;
+end if;
+end loop;
+return -1;
+end checkExistingInvoiceItem;
+
+
+
+
+procedure addInvoiceDetail(
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type,
+quantity1 items.total_quantity%type
+)
+is
+itemNo1 items.itemNo%type:=getItemNo(itemName1);
+itemPrice items.price%type:=getItemPrice(itemNo1);
+begin
+if checkExistingInvoice(invoiceNo1)=-1 then
+dbms_output.put_line('there is no invoice with this number: '||invoiceNo1);
+elsif checkExistingItem(itemName1) =1 then
+dbms_output.put_line('there is no item with this name: '||itemName1);
+else
+if checkExistingInvoiceItem(invoiceNo1,itemNo1) = -1 then
+insert into invoiceDetails values(invoiceNo1,itemNo1,(quantity1*itemPrice),quantity1);
+update invoices set price = price + (quantity1*itemPrice),total=total+quantity1 where invoiceNo = invoiceNo1;
+dbms_output.put_line('invoice details for the item: '||itemName1 ||' and the invoice number:'||invoiceNo1 ||'added in the invoiceDetail table');
+else
+update invoiceDetails set paidPrice = paidPrice+(quantity1*itemPrice) , quantity = quantity + quantity1 where invoiceNo = invoiceNo1 AND itemNo = itemNo1;
+update invoices set price = price + (quantity1*itemPrice),total=total+quantity1 where invoiceNo = invoiceNo1;
+dbms_output.put_line('i have found a record with the details given so i updated it');
+end if;
+update items set total_quantity  = total_quantity  - quantity1 where itemNo = itemNo1;
+end if;
+commit;
+end addInvoiceDetail;
+
+
+
+--##################################
+--I)
+
+-- this functoin will reteurn item quantity in the invoiceDetials table or it will return -1
+function getItemInvoiceQuantity (
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type
+) return number 
+is 
+begin 
+for i in (select * from invoiceDetails) loop
+if i.invoiceNo = invoiceNo1 AND i.itemNo = getItemNo(itemName1) then 
+return i.quantity;
+end if;
+end loop;
+return -1;
+end getItemInvoiceQuantity;
+
+
+
+-- this functoin will reteurn item paidPaice in the invoiceDetials table or it will return -1
+function getItemInvoicPaidPrice (
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type
+) return number 
+is 
+begin 
+for i in (select * from invoiceDetails) loop
+if i.invoiceNo = invoiceNo1 AND i.itemNo = getItemNo(itemName1) then 
+return i.paidPrice;
+end if;
+end loop;
+return -1;
+end getItemInvoicPaidPrice;
+
+
+
+procedure removeInvoiceItem(
+invoiceNo1 invoices.invoiceNo%type,
+itemName1 items.itemName%type
+) is 
+itemNo1 items.itemNo%type:=getItemNo(itemName1);
+paidPrice1 number :=getItemInvoicPaidPrice(invoiceno1,itemName1);
+quantity1 number :=getItemInvoiceQuantity (invoiceno1,itemName1);
+begin
+if checkExistingInvoice(invoiceNo1)=-1 then 
+dbms_output.put_line('there is no invoice with this numebr: '||invoiceNo1);
+elsif itemNo1 = -1 then 
+dbms_output.put_line('there is no item with this name: '||itemName1);
+elsif checkExistingInvoiceItem(invoiceNo1,itemNo1) =-1 then 
+dbms_output.put_line('the invoice: '||invoiceNo1 ||' does not have the item: '|| itemName1);
+else 
+update items set total_quantity = total_quantity + quantity1 where itemNo = itemNo1;
+update invoices set price = price - paidPrice1, total =total -quantity1 where invoiceNo = invoiceNo1;
+insert into InvoiceDeatail_deleted_History 
+values (invoiceNo1, itemNo1,paidPrice1,quantity1,sysdate);
+delete from invoiceDetails where invoiceno = invoiceNo1 AND itemNo = itemNo1;
+dbms_output.put_line('i deleted the record'); 
+end if;
+commit;
+end removeInvoiceItem;
+
+
+
+
+procedure getCustomerInvoiceInfo(
+invoiceNo1 invoices.invoiceNo%type
+) is 
+invoiceDate1 date;
+paidPrice1 number;
+customerName1 varchar2(30);
+employeeName1 varchar2(30);
+branchName1 varchar2(30);
+itemName1 varchar2(30);
+quantity1 number;
+price1 number;
+total_price1 number;
+begin
+if checkExistingInvoice(invoiceNo1)= -1 then 
+dbms_output.put_line('there is no invoice with this number: '||invoiceNo1);
+else 
+select customerName, employeeName, price, branchName, invoiceDate into  customerName1 , employeeName1 , paidPrice1 , branchName1 , invoiceDate1 
+from invoiceMaster 
+where invoiceNo = invoiceNo1;
+dbms_output.put_line('the customer: '|| customerName1 ||' bought from the branch: '||branchName1||' with total price of: '|| paidPrice1 ||' and he bought it from: '||employeeName1||' in: '|| invoiceDate1);
+for i in (select itemName , quantity , paidprice , total_price  from invoiceMasterDetail  where invoiceNo = invoiceNo1) loop 
+dbms_output.put_line('he bought the item: '|| i.itemName ||' with quantity of: '|| i.quantity ||' and it cost: '|| i.paidPrice ||' and the total of his invoice is : '|| i.total_price);
+end loop;
+end if;
+end getCustomerInvoiceInfo;
+
+
+end pointOfSal;
